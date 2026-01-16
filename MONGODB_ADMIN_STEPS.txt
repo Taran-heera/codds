@@ -1,0 +1,146 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                      MONGODB ADMIN USER - EXACT STEPS                         ║
+║                                                                              ║
+║              Copy-Paste Ready! No more confusion about format.               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: GENERATE HASHED PASSWORD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Open PowerShell or Command Prompt and run:
+
+  python -c "import bcrypt; h=bcrypt.hashpw(b'AdminPassword123',bcrypt.gensalt(10)); print(h.decode())"
+
+You'll see output like:
+  $2b$10$SomeVeryLongHashStringHere1234567890
+
+Copy that entire string (starting with $2b$10$)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 2: PREPARE THE DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use this template and replace PASTE_HASH_HERE with the hash from Step 1:
+
+{
+  "username": "admin",
+  "email": "admin@codds.com",
+  "password": "PASTE_HASH_HERE",
+  "role": "admin",
+  "analysis_count": 0,
+  "created_at": new Date()
+}
+
+Example with a real (sample) hash:
+
+{
+  "username": "admin",
+  "email": "admin@codds.com",
+  "password": "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86xNDj36QAm",
+  "role": "admin",
+  "analysis_count": 0,
+  "created_at": new Date()
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 3: INSERT INTO MONGODB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In MongoDB Compass:
+
+1. Left panel: Click "codds" database
+2. Under codds: Click "users" collection
+3. Top right: Click green "INSERT DOCUMENT" button
+4. Clear the empty template
+5. Copy-paste your document (with hashed password)
+6. Click "INSERT" button (green button at bottom)
+
+DONE! Your admin user is now in MongoDB!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 4: LOGIN AND TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to: http://localhost:3000
+
+2. Click "Login"
+
+3. Enter:
+   Username: admin
+   Password: AdminPassword123
+
+4. Click "Sign In"
+
+5. Should see Dashboard!
+
+6. Now you're logged in as admin
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 5: VIEW ADMIN ANALYTICS (OPTIONAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After logging in as admin, you can call the admin API:
+
+Open new tab and go to:
+  http://127.0.0.1:5000/api/admin/analytics
+
+You'll see:
+  {
+    "total_users": 5,
+    "active_users": 3,
+    "total_analyses": 42,
+    "average_originality": 68.5
+  }
+
+Or use Postman/curl:
+
+  curl -H "Authorization: Bearer YOUR_TOKEN" \
+       http://127.0.0.1:5000/api/admin/analytics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ WHAT NOT TO DO:
+
+DON'T paste this (it's empty - can't login!):
+{
+  "_id": {
+    "$oid": "6969ab3d98b78533111f89f5"
+  }
+}
+
+DON'T include _id field (MongoDB auto-creates it)
+
+DON'T use plain text password (it's not hashed!)
+
+DON'T forget to run Step 1 (password hashing)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ TROUBLESHOOTING
+
+Problem: "Can't login with admin/password"
+Solution: Make sure you pasted the hashed password correctly
+
+Problem: "API returns 403 Unauthorized"
+Solution: Admin role must be set to "admin" in document
+
+Problem: "Analytics endpoint returns empty"
+Solution: Make sure JWT token is included in Authorization header
+
+Problem: "Can't find users collection"
+Solution: Click "codds" database first, then look for "users"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ YOU'RE ALL SET!
+
+Follow these steps exactly and you'll have a working admin account.
+No more confusion about the empty _id document!
+
+════════════════════════════════════════════════════════════════════════════════

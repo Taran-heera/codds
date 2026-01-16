@@ -1,0 +1,124 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  ✅ MONGODB ADMIN USER SETUP - CORRECT WAY                    ║
+║                          DO NOT Include _id field                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ WRONG - Do NOT paste this:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{
+  "_id": {
+    "$oid": "6969ab3d98b78533111f89f5"
+  }
+}
+
+(This is empty - only has _id, no data!)
+
+
+✅ CORRECT - Paste this:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 1: Generate hashed password using Python
+
+Open terminal and run:
+
+  python -c "
+import bcrypt
+password = b'AdminPassword123'
+hashed = bcrypt.hashpw(password, bcrypt.gensalt(10))
+print(hashed.decode())
+  "
+
+This will output something like:
+  $2b$10$abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmno
+
+Copy that hash.
+
+
+Step 2: Paste this in MongoDB Compass (users collection)
+
+Replace HASHED_PASSWORD with the output from step 1:
+
+{
+  "username": "admin",
+  "email": "admin@codds.com",
+  "password": "PASTE_HASHED_PASSWORD_HERE",
+  "role": "admin",
+  "analysis_count": 0,
+  "created_at": new Date()
+}
+
+
+Example (with real hash):
+
+{
+  "username": "admin",
+  "email": "admin@codds.com",
+  "password": "$2b$10$SomeHashedPasswordString123456789012345",
+  "role": "admin",
+  "analysis_count": 0,
+  "created_at": new Date()
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 STEP-BY-STEP INSTRUCTIONS:
+
+1. Open MongoDB Compass
+2. Click: codds database → users collection
+3. Click: "Insert Document" button (green button)
+4. Clear the empty document template
+5. Paste the correct admin document (with hashed password)
+6. Click: "Insert" button
+7. Done!
+
+Now you can login with:
+  Username: admin
+  Password: AdminPassword123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ WHAT WAS WRONG:
+
+You were about to paste:
+{
+  "_id": {
+    "$oid": "6969ab3d98b78533111f89f5"
+  }
+}
+
+This has:
+  ❌ Only _id field (MongoDB auto-generates this anyway)
+  ❌ No username, email, password
+  ❌ No role field
+  ❌ Document is EMPTY - just _id, nothing else
+
+Result: Empty user document in database - can't login!
+
+
+✅ WHAT IS CORRECT:
+
+{
+  "username": "admin",
+  "email": "admin@codds.com",
+  "password": "$2b$10$...(hashed)",
+  "role": "admin",
+  "analysis_count": 0,
+  "created_at": new Date()
+}
+
+This has:
+  ✓ Username to login with
+  ✓ Email for the admin
+  ✓ Password (hashed for security)
+  ✓ Role set to admin
+  ✓ Created timestamp
+  ✓ Analysis count initialized to 0
+  ✓ No _id (MongoDB will auto-create it)
+
+Result: Full admin user account that can login!
+
+════════════════════════════════════════════════════════════════════════════════
